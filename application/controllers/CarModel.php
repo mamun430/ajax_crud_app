@@ -47,13 +47,86 @@ class CarModel extends CI_controller{
 
 	    	} else {
 	    		$response['status'] = 0;
-	    		$response['name'] = strip_tags(from_error('name'));
-	    		$response['color'] = strip_tags(from_error('color'));
-	    		$response['price'] = strip_tags(from_error('price'));
+	    		$response['name'] = strip_tags(form_error('name'));
+	    		$response['color'] = strip_tags(form_error('color'));
+	    		$response['price'] = strip_tags(form_error('price'));
                 // return error message
 	    	}
 	    	 echo json_encode($response);
 	    }
+
+        /* This method will return the edit form like crate*/
+		function getCarModel($id) {
+			$this->load->model('Car_model');
+			$row = $this->Car_model->getRow($id);
+            $data['row'] = $row;
+	
+			$html =  $this->load->view('car_model/edit.php', $data, true);
+			$response['html'] = $html;
+			echo json_encode($response);
+		}
+
+		function updateModel(){
+		
+				$this->load->model('Car_model');
+                $id = $this->input->post('id');
+				$row = $this->Car_model->getRow($id);
+
+				if(empty($row)){
+					$response['msg'] =  "Either record deleted or not found in DB";
+					$response['status'] = 100;
+					json_encode($response);
+					exit;
+				}
+
+				$this->load->library('form_validation');
+				$this->form_validation->set_rules('name', 'Name', 'required');
+				$this->form_validation->set_rules('color', 'Color', 'required');
+				$this->form_validation->set_rules('price', 'Price', 'required');
+	
+				if($this->form_validation->run() == true){
+					// update record
+					
+					$formArray = array();
+					$formArray['name'] = $this->input->post('name');
+					$formArray['color'] = $this->input->post('color');
+					$formArray['transmission'] = $this->input->post('transmission');
+					$formArray['price'] = $this->input->post('price');
+					$formArray['updated_at'] = date('Y-m-d H:i:s');
+					$id = $this->Car_model->update($id, $formArray);
+					$row = $this->Car_model->getRow($id);
+					
+					
+					$response['row'] =  $row;
+					$response['status'] = 1;
+					$response['message'] = "<div class= \"alert alert-success\">Record has been updated successfully </div>";
+	
+				} else {
+					$response['status'] = 0;
+					$response['name'] = strip_tags(form_error('name'));
+					$response['color'] = strip_tags(form_error('color'));
+					$response['price'] = strip_tags(form_error('price'));
+					// return error message
+				}
+				 echo json_encode($response);
+		}
+
+		function deleteModel($id){
+			    $this->load->model('Car_model');
+			    $row = $this->Car_model->getRow($id);
+
+				if(empty($row)){
+					$response['msg'] = "<div class=\"alert alert-warning\">Either record deleted or not found in DB</div>";
+					$response['status'] = 0;
+					echo json_encode($response);
+					exit;
+				}else{
+					$this->Car_model->delete($id);
+					$response['msg'] = "<div class=\"alert alert-success\"> Record has been already deleted successfully.</div>";
+					$response['status'] = 1;
+					echo json_encode($response);
+				}
+		}
 }
 
 ?>

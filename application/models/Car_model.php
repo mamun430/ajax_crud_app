@@ -20,7 +20,21 @@ class Car_model extends CI_model{
 
 	function getRow($id){
 		$this->db->where('id', $id);
-        $this->db->get('car_models');
+        $row = $this->db->get('car_models')->row_array();
+		return $row;
+	}
+
+	   
+	 
+	function update($id,$formArray){
+       $this->db->where('id', $id);
+	   $this->db->update('car_models', $formArray);
+	   return $id;
+	}
+
+	function delete($id){
+		$this->db->where('id', $id);
+		$this->db->delete('car_models');
 	}
 }
 ?>

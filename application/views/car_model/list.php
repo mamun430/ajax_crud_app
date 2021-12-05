@@ -63,14 +63,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">Create</h5>
+        <h5 class="modal-title" id="title">Create</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div id="response">
 		
-			</div>
+	</div>
       
     </div>
   </div>
@@ -80,7 +80,7 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">Alert</h5>
+        <h5 class="modal-title" id="title">Alert</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -99,9 +99,37 @@
   </div>
 </div> 
 
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="title">Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+   
+		        
+        <div class="modal-body">
+        	
+        </div>
+		    <div class="modal-footer">
+ 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					 <button type="button" class="btn btn-danger" onclick="deleteNow();" >Yes</button>
+        </div>
+			
+      
+    </div>
+  </div>
+</div> 
+
+
 <script type="text/javascript">
 	function showModal(){
 		$("#createCar").modal("show");
+		$("#createCar #title").html('Create');
+	
 
 		$.ajax({
 			url: '<?php echo base_url().'index.php/CarModel/showCreateForm'?>',
@@ -150,9 +178,9 @@
             }
             else{
 
-            	 	$("#createCar").modal("hide");
-            	 	$("#ajaxResponseModal .modal-body").html(response["message"]);
-            	 	$("#ajaxResponseModal").modal("show");
+            	$("#createCar").modal("hide");
+            	$("#ajaxResponseModal .modal-body").html(response["message"]);
+            	$("#ajaxResponseModal").modal("show");
 
 
 
@@ -160,7 +188,7 @@
             	$("#name").removeClass('is-invalid');
 
             	$(".colorError").html("").removeClass('invalid-feedback d-block');
-              $("#color").removeClass('is-invalid');
+                $("#color").removeClass('is-invalid');
             	 			 
             	$(".priceError").html("").removeClass('invalid-feedback d-block');
             	$("#price").removeClass('is-invalid');	
@@ -173,6 +201,116 @@
 
 
 	 });
+
+	 function showEditForm(id){
+		$("#createCar .modal-title").html('Edit');
+		$.ajax({
+			url: '<?php echo base_url().'index.php/CarModel/getCarModel/'?>'+id,
+			type: 'POST',
+			dataType: 'json',
+			success: function(response){
+				$("#createCar #response").html(response["html"]);
+				$("#createCar").modal('show');
+			}
+		});
+
+	 }
+
+	
+	$("body").on("submit","#editCarModel", function(e){
+	 	  e.preventDefault();
+	 	  
+	 	  $.ajax({
+			url: '<?php echo base_url().'index.php/CarModel/updateModel'?>',
+			type: 'POST',
+			data: $(this).serializeArray(),
+			dataType: 'json',
+			success: function(response){
+              
+            if(response['status']==0) {
+            	if(response["name"] != ""){
+            	 			 $(".nameError").html(response["name"]).addClass('invalid-feedback d-block');
+            	 			 $("#name").addClass('is-invalid');
+            			 }else{
+            			 	 $(".nameError").html("").removeClass('invalid-feedback d-block');
+            	 			 $("#name").removeClass('is-invalid');
+            			 }
+            			 if(response["color"] != ""){
+            	 			 $(".colorError").html(response["color"]).addClass('invalid-feedback d-block');
+            	 			 $("#color").addClass('is-invalid');
+            			 }else{
+            			 	 $(".colorError").html("").removeClass('invalid-feedback d-block');
+            	 			 $("#color").removeClass('is-invalid');
+            			 }
+            			 if(response["price"] != ""){
+            	 			 $(".priceError").html(response["price"]).addClass('invalid-feedback d-block');
+            	 			 $("#price").addClass('is-invalid');
+            			 }else{
+            			 	 $(".priceError").html("").removeClass('invalid-feedback d-block');
+            	 			 $("#price").removeClass('is-invalid');
+            			 } 		
+            }
+            else{
+             
+				$("#createCar").modal("hide");
+            	$("#ajaxResponseModal .modal-body").html(response["message"]);
+            	$("#ajaxResponseModal").modal("show");
+
+            	$(".nameError").html("").removeClass('invalid-feedback d-block');
+            	$("#name").removeClass('is-invalid');
+
+            	$(".colorError").html("").removeClass('invalid-feedback d-block');
+                $("#color").removeClass('is-invalid');
+            	 			 
+            	$(".priceError").html("").removeClass('invalid-feedback d-block');
+            	$("#price").removeClass('is-invalid');	
+
+            
+				var id = response["row"]["id"];
+				$("#row-"+id+" .modelName").html(response["row"]["name"]);
+				$("#row-"+id+" .modelColor").html(response["row"]["color"]);
+				$("#row-"+id+" .modelTransmission").html(response["row"]["transmission"]);
+				$("#row-"+id+" .modelPrice").html(response["row"]["price"]); 
+            	 	
+            }
+			}
+		});
+
+
+	 });
+ 
+
+	 function confirmDeleteModel(id){
+		   $("#deleteModal").modal("show");
+           $("#deleteModal .modal-body").html("Are you sure you want to delete #"+id+"?");
+		   $("#deleteModal").data("id", id);
+	 }
+
+	 function deleteNow(){
+          var id = $("#deleteModal").data('id');
+
+		  $.ajax({
+			url: '<?php echo base_url().'index.php/CarModel/deleteModel/'?>'+id,
+			type: 'POST',
+			data: $(this).serializeArray(),
+			dataType: 'json',
+			success: function(response){
+              
+            if(response['status']==1) {
+				$("#deleteModal").modal("hide");
+				$("#ajaxResponseModal .modal-body").html(response["msg"]);
+            	$("#ajaxResponseModal").modal("show");
+				
+			}else{
+				$("#deleteModal").modal("hide");
+				$("#ajaxResponseModal .modal-body").html(response["msg"]);
+            	$("#ajaxResponseModal").modal("show");
+			}
+
+			}
+	});
+
+	 }
 
 </script>
 
