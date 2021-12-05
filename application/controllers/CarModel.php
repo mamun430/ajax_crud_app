@@ -12,7 +12,6 @@ class CarModel extends CI_controller{
 
 	    }
 
-		//test comment
 
 	    function showCreateForm(){
          	$html =  $this->load->view('car_model/create.php', '', true);
